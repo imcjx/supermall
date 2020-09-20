@@ -28,7 +28,8 @@
   import Scroll from 'components/common/scroll/Scroll'
   import BackTop from 'components/content/backTop/BackTop'
 
-  import {getHomeMutiData,getHomeGoods} from 'network/home.js'
+  import {getHomeMutiData,getHomeGoods} from 'network/home'
+  import {debounce} from 'common/utils'
 
   export default {
     name: "Home",
@@ -67,10 +68,12 @@
       this.getHomeGoods('pop');
       this.getHomeGoods('new');
       this.getHomeGoods('sell');
-
+    },
+    mounted(){
       //监听item中的图片加载
+      const refresh=debounce(this.$refs.scroll.refresh,50)
       this.$bus.$on('itemImgLoad', () => {
-        this.$refs.scroll.refresh();
+        refresh();
       })
     },
     methods:{
@@ -100,6 +103,7 @@
         this.getHomeGoods(this.currentType);
         console.log('上拉加载更多');
       },
+
       /**
        * 网络请求相关的方法
        */
@@ -115,6 +119,7 @@
           this.goods[type].list.push(...res.data.list);
           this.goods[type].page++;
 
+          //完成上拉加载更多
           this.$refs.scroll.finishPullUp();
         })
       }
@@ -125,6 +130,7 @@
 <style scoped>
   #home{
     height: 100vh;
+    padding-top: 44px;
   }
 
   .home-nav{
@@ -138,8 +144,7 @@
   }
 
   .content{
-    height: calc(100% - 93px);
-    margin-top: 44px;
+    height: calc(100% - 49px);
     overflow: hidden;
   }
 </style>
