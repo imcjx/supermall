@@ -1,13 +1,19 @@
 <template>
   <div id="home">
     <nav-bar class="home-nav"><div slot="center">购物街</div></nav-bar>
-    <scroll class="content">
+    <scroll class="content"
+            ref="scroll"
+            :probe-type="3"
+            @scroll="contentScroll"
+            @pullingUp="loadMore"
+            :pull-up-load="true">
       <home-swipe :banners="banners" />
       <recommend-view :recommends="recommends" />
       <feature-view />
       <tab-control :titles="['流行','新款','精选']" @tabClick="tabClick"/>
       <goods-list :goods="showGoods" />
     </scroll>
+    <back-top @click.native="backTopClick" v-show="isShowBackTop"/>
   </div>
 </template>
 
@@ -45,7 +51,8 @@
           'new': {page: 0, list: []},
           'sell': {page: 0, list: []},
         },
-        currentType: 'pop'
+        currentType: 'pop',
+        isShowBackTop: false
       }
     },
     computed:{
@@ -60,6 +67,11 @@
       this.getHomeGoods('pop');
       this.getHomeGoods('new');
       this.getHomeGoods('sell');
+
+      //监听item中的图片加载
+      this.$bus.$on('itemImgLoad', () => {
+        this.$refs.scroll.refresh();
+      })
     },
     methods:{
       /**
@@ -78,7 +90,16 @@
             break;
         }
       },
-
+      backTopClick(){
+        this.$refs.scroll.scrollTo(0,0,1000);
+      },
+      contentScroll(position){
+        this.isShowBackTop=(-position.y)>1000
+      },
+      loadMore(){
+        this.getHomeGoods(this.currentType);
+        console.log('上拉加载更多');
+      },
       /**
        * 网络请求相关的方法
        */
@@ -93,6 +114,8 @@
         getHomeGoods(type,page).then(res => {
           this.goods[type].list.push(...res.data.list);
           this.goods[type].page++;
+
+          this.$refs.scroll.finishPullUp();
         })
       }
     }
@@ -102,7 +125,6 @@
 <style scoped>
   #home{
     height: 100vh;
-    padding-top: 44px;
   }
 
   .home-nav{
@@ -115,13 +137,9 @@
     z-index: 9;
   }
 
-  .tab-control{
-    position: sticky;
-    top: 44px;
-  }
-
   .content{
-    height: calc(100% - 49px);
+    height: calc(100% - 93px);
+    margin-top: 44px;
     overflow: hidden;
   }
 </style>
