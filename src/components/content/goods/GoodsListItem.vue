@@ -30,8 +30,8 @@
         this.$bus.$emit('itemImgLoad')
       },
       itemClick(){
-        //param
-        this.$router.push('/detail/'+this.goodsItem.iid);
+        // param
+        // this.$router.push('/detail/'+this.goodsItem.iid);
         /**
          * query
          * this.$router.push({
@@ -40,6 +40,12 @@
          *  }
          * });
          */
+        this.$router.push({
+          path: '/detail',
+          query:{
+            iid:this.goodsItem.iid
+          }
+        })
 
       }
     }
