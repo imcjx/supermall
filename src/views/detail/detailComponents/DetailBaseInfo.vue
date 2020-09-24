@@ -46,6 +46,7 @@ export default {
   .detail-base-info{
     padding: 10px 10px;
     border-bottom: 5px solid rgb(248,248,248);
+    margin-bottom: 20px;
   }
 
   .title{
